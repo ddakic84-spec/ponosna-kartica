@@ -1,6 +1,8 @@
 import Link from "next/link";
+import Image from "next/image";
 import ZahtevForma from "@/components/zahtev-forma";
 import { Zaglavlje } from "@/components/zaglavlje";
+import logoTtd from "@/assets/logo-ttd.png";
 import { dajGradove } from "@/lib/baza";
 
 // Листа градова се чита из базе при сваком отварању, да нови градови одмах уђу у мени.
@@ -41,13 +43,20 @@ export default async function Pocetna() {
         />
       </div>
 
-      <footer className="mt-16 flex gap-4 border-t border-zinc-200 pt-4 text-xs text-zinc-400">
-        <Link href="/privatnost" className="hover:text-zinc-600">
-          Обавјештење о приватности
-        </Link>
-        <Link href="/admin" className="hover:text-zinc-600">
-          Админ
-        </Link>
+      <footer className="mt-16 flex items-center justify-between gap-4 border-t border-zinc-200 pt-4">
+        <div className="flex gap-4 text-xs text-zinc-400">
+          <Link href="/privatnost" className="hover:text-zinc-600">
+            Обавјештење о приватности
+          </Link>
+          <Link href="/admin" className="hover:text-zinc-600">
+            Админ
+          </Link>
+        </div>
+        <Image
+          src={logoTtd}
+          alt="Transforming to Digital Ltd"
+          className="h-6 w-auto opacity-80"
+        />
       </footer>
     </main>
   );
