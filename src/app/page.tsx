@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ZahtevForma from "@/components/zahtev-forma";
+import { Zaglavlje } from "@/components/zaglavlje";
 import { dajGradove } from "@/lib/baza";
 
 // Листа градова се чита из базе при сваком отварању, да нови градови одмах уђу у мени.
@@ -17,6 +18,8 @@ export default async function Pocetna() {
 
   return (
     <main className="mx-auto w-full max-w-xl px-4 py-10 sm:py-16">
+      <Zaglavlje />
+
       <h1 className="text-2xl font-semibold tracking-tight">
         Захтјев за Нестро е-картицу
       </h1>
