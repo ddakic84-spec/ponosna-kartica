@@ -6,7 +6,14 @@ import { dajGradove } from "@/lib/baza";
 export const dynamic = "force-dynamic";
 
 export default async function Pocetna() {
-  const gradovi = await dajGradove();
+  let gradovi: string[] = [];
+  let greskaBaze = false;
+  try {
+    gradovi = await dajGradove();
+  } catch (e) {
+    greskaBaze = true;
+    console.error("Не могу да учитам градове:", e);
+  }
 
   return (
     <main className="mx-auto w-full max-w-xl px-4 py-10 sm:py-16">
@@ -17,6 +24,12 @@ export default async function Pocetna() {
         Програм „Поносна картица 2026–2028". Попуните сва поља тачно у траженом
         облику.
       </p>
+
+      {greskaBaze && (
+        <p className="mt-6 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800">
+          Тренутно није могуће учитати листу градова. Покушајте касније.
+        </p>
+      )}
 
       <div className="mt-8">
         <ZahtevForma

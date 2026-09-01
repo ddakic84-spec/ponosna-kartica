@@ -8,12 +8,13 @@ import { createClient } from "@supabase/supabase-js";
 // изнад ће зауставити пробни превод (build) ако неко случајно овај фајл увезе
 // у компоненту означену са "use client".
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// .trim() — заштита ако је при уносу кључа случајно ушао размак или нови ред.
+const url = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").trim();
+const serviceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY ?? "").trim();
 
 if (!url || !serviceKey) {
   throw new Error(
-    "Недостаје NEXT_PUBLIC_SUPABASE_URL или SUPABASE_SERVICE_ROLE_KEY у .env.local",
+    "Недостаје NEXT_PUBLIC_SUPABASE_URL или SUPABASE_SERVICE_ROLE_KEY",
   );
 }
 
