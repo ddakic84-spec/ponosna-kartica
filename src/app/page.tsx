@@ -55,7 +55,7 @@ export default async function Pocetna() {
         <Image
           src={logoTtd}
           alt="Transforming to Digital Ltd"
-          className="h-6 w-auto opacity-80"
+          className="h-11 w-auto"
         />
       </footer>
     </main>
