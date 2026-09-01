@@ -1,36 +1,33 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Поносна картица 2026–2028
 
-## Getting Started
+Јавна веб апликација Фондације за провјеру и активацију Нестро е-картице.
 
-First, run the development server:
+- **Јавна форма** (`/`): грађанин уноси име, град, бар код и телефон; апликација
+  провјерава право на картицу и биљежи прихваћене захтјеве.
+- **Обавјештење о приватности** (`/privatnost`).
+- **Админ дио** (`/admin`, заштићен пријавом): учитавање Excel листа, управљање
+  градовима, преузимање захтјева као Excel.
+
+## Технологије
+
+Next.js (App Router) · Supabase (Postgres) · Cloudflare Turnstile · Vercel
+
+## Локални развој
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Апликација ради на `http://localhost:3100`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Потребан је фајл `.env.local` са кључевима — види `.env.example`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## База података
 
-## Learn More
+SQL измјене су у `supabase/migrations/` и покрећу се редом у Supabase SQL Editor-у.
 
-To learn more about Next.js, take a look at the following resources:
+## Објављивање
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Пуши на `master` грану → Vercel аутоматски објављује.
+Кључеви из `.env.local` морају бити унесени и у Vercel → Settings → Environment Variables.
