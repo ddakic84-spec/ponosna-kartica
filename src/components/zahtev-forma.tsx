@@ -195,7 +195,7 @@ export default function ZahtevForma({
 
       <div>
         <label htmlFor="barKod" className="block text-sm font-medium">
-          Бар код
+          Бар код са нове Поносне картице 2026-2028
         </label>
         <input
           id="barKod"
