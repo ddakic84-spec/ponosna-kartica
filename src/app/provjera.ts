@@ -16,6 +16,7 @@ export type RezultatProvjere =
   | { status: "prihvacen" }
   | { status: "vec_podnesen" }
   | { status: "nije_evidentiran" }
+  | { status: "bar_kod_nije_nadjen" }
   | { status: "previse_pokusaja" }
   | { status: "robot" }
   | { status: "greska" };
@@ -44,7 +45,7 @@ export async function provjeriZahtjev(unos: Unos): Promise<RezultatProvjere> {
     return { status: "nije_evidentiran" };
   }
 
-  // (0b) Ограничење броја покушаја по IP: највише 8 у 5 минута, 25 у сат.
+  // (0b) Ограничење броја покушаја по IP.
   const ok5 = await dozvoljenPokusaj("provjera-5min", 8, 5);
   const ok60 = await dozvoljenPokusaj("provjera-60min", 25, 60);
   if (!ok5 || !ok60) return { status: "previse_pokusaja" };
@@ -60,7 +61,7 @@ export async function provjeriZahtjev(unos: Unos): Promise<RezultatProvjere> {
   const barKod = samoCifre(String(unos?.barKod ?? ""));
   const telefon = samoCifre(String(unos?.telefon ?? ""));
 
-  // (1) формат (сервер увијек провјерава поново)
+  // (1) Формат (сервер увијек провјерава поново).
   let gradovi: string[];
   try {
     gradovi = await dajGradove();
@@ -77,55 +78,54 @@ export async function provjeriZahtjev(unos: Unos): Promise<RezultatProvjere> {
   }
 
   const imeNorm = normalizujIme(imePrezime);
-  let nacin: string | null = null;
 
-  // (2) у листи изабраног града постоји ред са овим бар кодом
-  const { data: poBarkodu, error: e1 } = await supabaseServer
+  // (2) Име + град МОРАЈУ да се поклопе са неким редом у листи тог града.
+  //     Ако нема — захтјев се одбија (не смије се прихватити само по бар коду,
+  //     то би било погађање кода).
+  const { data: poImenu, error: e1 } = await supabaseServer
     .from("korisnici_kartice")
-    .select("ime_norm")
+    .select("bar_kod")
     .eq("grad", grad)
-    .eq("bar_kod", barKod);
+    .eq("ime_norm", imeNorm);
   if (e1) return { status: "greska" };
-
-  if (poBarkodu && poBarkodu.length > 0) {
-    nacin = poBarkodu.some((r) => r.ime_norm === imeNorm)
-      ? "grad_i_barkod"
-      : "grad_i_barkod_ime_ne";
+  if (!poImenu || poImenu.length === 0) {
+    return { status: "nije_evidentiran" };
   }
 
-  // (3) и (4)
-  if (!nacin) {
-    const [poImenu, uMaster] = await Promise.all([
-      supabaseServer
-        .from("korisnici_kartice")
-        .select("id")
-        .eq("grad", grad)
-        .eq("ime_norm", imeNorm)
-        .limit(1),
-      barKodPostojiUMaster(barKod),
-    ]);
-    if (poImenu.error) return { status: "greska" };
-
-    if (uMaster && poImenu.data && poImenu.data.length > 0) {
-      nacin = "ime_i_master";
-    } else if (uMaster) {
-      nacin = "samo_master";
-    }
+  // (3) Бар код мора бити прави: или у комплетној листи од 12.000, или тачно
+  //     онај који стоји уз то име у листи града.
+  const barKodNaListi = poImenu.some((r) => r.bar_kod === barKod);
+  const uMaster = barKodNaListi ? true : await barKodPostojiUMaster(barKod);
+  if (!uMaster) {
+    return { status: "bar_kod_nije_nadjen" };
   }
 
-  // (5) нема поклапања
-  if (!nacin) return { status: "nije_evidentiran" };
+  const nacin = barKodNaListi ? "ime_i_barkod_sa_liste" : "ime_i_master";
 
-  // прихваћено → упис
+  // (4) Само један захтјев по особи (град + име).
+  const { data: postojeci, error: e2 } = await supabaseServer
+    .from("zahtjevi")
+    .select("id")
+    .eq("grad", grad)
+    .eq("ime_norm", imeNorm)
+    .limit(1);
+  if (e2) return { status: "greska" };
+  if (postojeci && postojeci.length > 0) {
+    return { status: "vec_podnesen" };
+  }
+
+  // (5) Упис прихваћеног захтјева.
   const { error: eIns } = await supabaseServer.from("zahtjevi").insert({
     ime_prezime: imePrezime,
     grad,
     bar_kod: barKod,
     telefon,
+    ime_norm: imeNorm,
     nacin_prihvatanja: nacin,
   });
 
   if (eIns) {
+    // 23505 = кршење јединствености (истовремени други захтјев исте особе)
     if (eIns.code === "23505") return { status: "vec_podnesen" };
     return { status: "greska" };
   }

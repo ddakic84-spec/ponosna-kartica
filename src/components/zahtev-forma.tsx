@@ -19,6 +19,7 @@ const EMAIL_FONDACIJE = "dragan.dakic@zaporodicu.org";
 type Ishod =
   | { vrsta: "greska"; poruka: string }
   | { vrsta: "uspjeh"; poruka: string }
+  | { vrsta: "info"; poruka: string }
   | { vrsta: "nije_evidentiran" }
   | null;
 
@@ -28,11 +29,18 @@ function izRezultata(r: RezultatProvjere): Ishod {
       return { vrsta: "uspjeh", poruka: PORUKA_PRIHVACEN };
     case "vec_podnesen":
       return {
-        vrsta: "uspjeh",
-        poruka: "Захтјев за ове податке је већ раније поднесен и евидентиран.",
+        vrsta: "info",
+        poruka:
+          "Ваш претходни захтјев је прихваћен. Није дозвољено подношење више од једног захтјева.",
       };
     case "nije_evidentiran":
       return { vrsta: "nije_evidentiran" };
+    case "bar_kod_nije_nadjen":
+      return {
+        vrsta: "greska",
+        poruka:
+          "Унесени бар код није пронађен. Провјерите да сте тачно преписали свих 13 цифара са картице.",
+      };
     case "format":
       return { vrsta: "greska", poruka: PORUKA_FORMAT };
     case "previse_pokusaja":
@@ -202,7 +210,7 @@ export default function ZahtevForma({
           className={klasaPolja(greske.barKod)}
         />
         <p className="mt-1 text-xs text-zinc-500">
-          Тачно 13 цифара, нпр. „2707201112000".
+          Тачно 13 цифара, нпр. „2707…“.
         </p>
       </div>
 
@@ -223,8 +231,8 @@ export default function ZahtevForma({
           className={klasaPolja(greske.telefon)}
         />
         <p className="mt-1 text-xs text-zinc-500">
-          Почиње са „3876" и има још тачно 7 цифара (укупно 11), без размака и
-          цртица.
+          Почиње са „3876“ и има још тачно 7 цифара (укупно 11). Без знака „+“,
+          без почетне нуле, без размака и цртица.
         </p>
       </div>
 
@@ -252,7 +260,9 @@ export default function ZahtevForma({
           className={
             ishod.vrsta === "greska"
               ? "rounded-md bg-red-50 px-3 py-2 text-sm text-red-800"
-              : "rounded-md bg-green-50 px-3 py-2 text-sm text-green-800"
+              : ishod.vrsta === "info"
+                ? "rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800"
+                : "rounded-md bg-green-50 px-3 py-2 text-sm text-green-800"
           }
         >
           {ishod.poruka}
