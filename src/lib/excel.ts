@@ -13,8 +13,11 @@ export type RedGrada = { imePrezime: string; barKod: string | null };
 
 const CIRILICA = /[Ѐ-ӿ]/;
 const LATINICA = /[A-Za-z]/;
+// Ћирилична И латинична верзија сваке ријечи — неки фајлови имају заглавља
+// искључиво на латиници (нпр. „Datum i mjesto rođenja"), па само ћирилична
+// провјера не би препознала да је то заглавље, не име.
 const KLJUCNE_RIJECI =
-  /(име|презиме|датум|година|годиште|број|телефон|редни|мобил|дјет|ime|prezime|redni|broj|dopina|достављен|bar\s*kod|barkod|корисник|подносилац)/i;
+  /(име|презиме|датум|година|годиште|број|телефон|редни|мобил|дјет|мјест|напомен|ime|prezime|redni|broj|dopina|datum|mjesto|godin|godiš|telefon|mobil|djet|napomen|достављен|bar\s*kod|barkod|корисник|подносилац|контакт|kontakt)/i;
 
 function liciNaImeIPrezime(v: string): boolean {
   const t = v.trim().replace(/\s+/g, " ");
